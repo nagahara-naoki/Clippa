@@ -1,0 +1,56 @@
+/* Clippa English Localization */
+
+"app.name" = "Clippa";
+"menu.openPopup" = "Open Clippa";
+"menu.preferences" = "Preferences…";
+"menu.about" = "About Clippa";
+"menu.quit" = "Quit Clippa";
+
+"tab.history" = "History";
+"tab.snippets" = "Text";
+
+"history.search.placeholder" = "Search history…";
+"history.empty.title" = "No history yet";
+"history.empty.subtitle" = "Copied items appear here.";
+"history.clearAll" = "Clear All";
+"history.pinned" = "Pinned";
+
+"snippets.search.placeholder" = "Search saved text…";
+"snippets.new" = "Add";
+"snippets.empty.title" = "No saved text";
+"snippets.empty.subtitle" = "Save text you paste often.";
+"snippets.uncategorized" = "";
+"snippets.edit" = "Edit";
+"snippets.delete" = "Delete";
+"snippets.paste" = "Paste";
+"snippets.newFolder" = "";
+
+"settings.tab.general" = "General";
+"settings.tab.hotkey" = "Hotkey";
+"settings.tab.history" = "History";
+"settings.tab.snippets" = "Text";
+"settings.tab.about" = "About";
+
+"settings.language" = "Language";
+"settings.language.system" = "System";
+"settings.launchAtLogin" = "Launch at login";
+"settings.showInMenuBar" = "Show in menu bar";
+"settings.hotkey.popup" = "Open Clippa";
+"settings.history.maxItems" = "Max items";
+"settings.history.maxDays" = "Retention (days)";
+"settings.history.imageMaxBytes" = "Image storage";
+"settings.history.excludeApps" = "Ignored apps";
+"settings.pasteStack.enabled" = "Paste Queue";
+"settings.pasteStack.description" = "Paste saved items one after another.";
+
+"permission.accessibility.title" = "Allow Accessibility";
+"permission.accessibility.description" = "Clippa needs this to paste for you.";
+"permission.accessibility.openSettings" = "Open System Settings";
+
+"onboarding.welcome.title" = "Welcome to Clippa";
+"onboarding.welcome.subtitle" = "Keep copied text, images, and screenshots close.";
+"onboarding.hotkey.title" = "Open with Cmd+Shift+V";
+"onboarding.hotkey.subtitle" = "Search and paste from one small window.";
+"onboarding.permission.title" = "Allow Paste";
+"onboarding.permission.subtitle" = "Enable Accessibility so Clippa can paste selected items.";
+"onboarding.done" = "Start";

@@ -1,0 +1,780 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Clippa - Clipboard history for Mac</title>
+  <meta name="description" content="Clippa brings fast, local clipboard history to Mac. Open with Cmd+Shift+V, search past copies, preview images, and paste instantly. Free on GitHub Releases.">
+  <meta property="og:title" content="Clippa - Clipboard history for Mac">
+  <meta property="og:description" content="A small native Mac app that keeps your copied text, images, and screenshots close. Free on GitHub Releases.">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#FFD60A">
+  <style>
+    :root {
+      --ink: #111215;
+      --ink-soft: #3d4048;
+      --muted: #707682;
+      --line: #e9e2cb;
+      --paper: #fffaf0;
+      --cream: #fff6dc;
+      --gold: #ffd60a;
+      --gold-2: #f4b400;
+      --green: #2ea86b;
+      --blue: #2f6fec;
+      --coral: #f16b4f;
+      --shadow: 0 24px 80px rgba(32, 25, 8, .18);
+      --shadow-soft: 0 12px 36px rgba(32, 25, 8, .10);
+      font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        linear-gradient(120deg, rgba(255, 214, 10, .18), transparent 34%),
+        radial-gradient(circle at 82% 12%, rgba(47, 111, 236, .11), transparent 30%),
+        linear-gradient(180deg, #fffaf0 0%, #fffdf7 42%, #f8f6ef 100%);
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    img { display: block; max-width: 100%; }
+    .wrap { width: min(1120px, calc(100% - 40px)); margin: 0 auto; }
+
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      border-bottom: 1px solid rgba(17, 18, 21, .08);
+      background: rgba(255, 250, 240, .82);
+      backdrop-filter: blur(20px);
+    }
+
+    .nav-inner {
+      height: 68px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 22px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      font-size: 18px;
+    }
+
+    .brand img {
+      width: 34px;
+      height: 34px;
+      filter: drop-shadow(0 6px 12px rgba(35, 22, 0, .16));
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      color: var(--ink-soft);
+      font-size: 14px;
+    }
+
+    .nav-links a:hover { color: var(--ink); }
+
+    .download-small {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 14px;
+      border-radius: 999px;
+      color: #fff;
+      background: var(--ink);
+      font-weight: 700;
+      box-shadow: 0 10px 24px rgba(17, 18, 21, .16);
+    }
+
+    .hero {
+      position: relative;
+      min-height: calc(100vh - 68px);
+      display: grid;
+      align-items: center;
+      padding: 64px 0 88px;
+      overflow: hidden;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(360px, 520px);
+      gap: 58px;
+      align-items: center;
+    }
+
+    .eyebrow {
+      width: fit-content;
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 8px 12px;
+      border: 1px solid rgba(181, 126, 32, .22);
+      border-radius: 999px;
+      color: #6b4b00;
+      background: rgba(255, 214, 10, .18);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .pulse {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 0 5px rgba(46, 168, 107, .12);
+    }
+
+    h1 {
+      margin: 24px 0 0;
+      max-width: 760px;
+      font-size: clamp(48px, 7vw, 90px);
+      line-height: .95;
+      letter-spacing: -0.055em;
+    }
+
+    .hero-copy {
+      margin: 24px 0 0;
+      max-width: 590px;
+      color: var(--ink-soft);
+      font-size: 19px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-top: 34px;
+      align-items: center;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      min-height: 52px;
+      padding: 0 22px;
+      border-radius: 14px;
+      border: 1px solid transparent;
+      font-weight: 800;
+      transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+
+    .button:hover { transform: translateY(-2px); }
+    .primary {
+      color: #fff;
+      background: var(--ink);
+      box-shadow: 0 18px 36px rgba(17, 18, 21, .20);
+    }
+
+    .secondary {
+      color: var(--ink);
+      background: rgba(255, 255, 255, .7);
+      border-color: rgba(17, 18, 21, .12);
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 20px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .meta span {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .check {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: rgba(46, 168, 107, .15);
+      color: var(--green);
+      display: grid;
+      place-items: center;
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .showcase {
+      position: relative;
+      min-height: 560px;
+    }
+
+    .app-icon {
+      position: absolute;
+      right: 18px;
+      top: 0;
+      width: 112px;
+      filter: drop-shadow(0 24px 32px rgba(35, 22, 0, .25));
+      transform: rotate(4deg);
+      z-index: 2;
+    }
+
+    .mac-frame {
+      position: absolute;
+      inset: 54px 0 0;
+      border: 1px solid rgba(17, 18, 21, .13);
+      border-radius: 26px;
+      background: linear-gradient(180deg, #30343b, #16181d);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .screen-bar {
+      height: 42px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 16px;
+      color: rgba(255,255,255,.56);
+      font-size: 12px;
+      background: rgba(255,255,255,.06);
+    }
+
+    .dot { width: 11px; height: 11px; border-radius: 50%; }
+    .dot.red { background: #ff605c; }
+    .dot.yellow { background: #ffbd44; }
+    .dot.green { background: #00ca4e; }
+
+    .desktop {
+      position: relative;
+      height: 488px;
+      padding: 28px;
+      background:
+        linear-gradient(135deg, rgba(255, 214, 10, .24), transparent 44%),
+        linear-gradient(160deg, #2d3139, #111318);
+    }
+
+    .menubar {
+      position: absolute;
+      top: 16px;
+      left: 28px;
+      right: 28px;
+      height: 34px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+      padding: 0 13px;
+      color: rgba(255,255,255,.75);
+      background: rgba(255,255,255,.11);
+      backdrop-filter: blur(16px);
+    }
+
+    .menubar img { width: 18px; filter: invert(1); opacity: .94; }
+
+    .popup {
+      width: min(360px, 100%);
+      margin: 56px auto 0;
+      border: 1px solid rgba(255,255,255,.38);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, .88);
+      backdrop-filter: blur(28px);
+      box-shadow: 0 28px 58px rgba(0, 0, 0, .26);
+      overflow: hidden;
+    }
+
+    .tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      padding: 8px;
+      border-bottom: 1px solid rgba(17, 18, 21, .08);
+    }
+
+    .tab {
+      padding: 8px;
+      border-radius: 9px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .tab.active {
+      color: var(--ink);
+      background: rgba(17, 18, 21, .08);
+    }
+
+    .search {
+      height: 42px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 0 14px;
+      color: var(--muted);
+      border-bottom: 1px solid rgba(17, 18, 21, .08);
+      font-size: 13px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 32px minmax(0, 1fr) 42px;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-bottom: 1px solid rgba(17, 18, 21, .06);
+    }
+
+    .row.selected { background: rgba(255, 214, 10, .22); }
+    .row-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-weight: 900;
+      background: var(--blue);
+    }
+
+    .row:nth-child(4) .row-icon { background: var(--coral); }
+    .row:nth-child(5) .row-icon { background: var(--green); }
+    .row:nth-child(6) .row-icon { background: var(--gold-2); color: var(--ink); }
+    .row-title {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: 13px;
+      font-weight: 750;
+    }
+
+    .row-sub {
+      margin-top: 1px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .key {
+      justify-self: end;
+      color: var(--muted);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 11px;
+    }
+
+    .below-fold {
+      margin-top: -34px;
+      padding: 0 0 72px;
+    }
+
+    .strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: rgba(255,255,255,.72);
+      box-shadow: var(--shadow-soft);
+      overflow: hidden;
+    }
+
+    .strip-item {
+      padding: 24px;
+      min-height: 144px;
+      border-right: 1px solid var(--line);
+    }
+
+    .strip-item:last-child { border-right: 0; }
+    .strip-item strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 16px;
+    }
+
+    .strip-item p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .section {
+      padding: 86px 0;
+      border-top: 1px solid rgba(17,18,21,.08);
+    }
+
+    .section-head {
+      max-width: 680px;
+      margin-bottom: 36px;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      font-size: clamp(34px, 5vw, 56px);
+      line-height: 1;
+      letter-spacing: -0.045em;
+    }
+
+    .section-head p {
+      margin: 16px 0 0;
+      color: var(--ink-soft);
+      font-size: 18px;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .feature {
+      padding: 24px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255,255,255,.72);
+      box-shadow: 0 8px 28px rgba(32, 25, 8, .06);
+    }
+
+    .feature-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 18px;
+      color: var(--ink);
+      background: var(--gold);
+      font-weight: 900;
+    }
+
+    .feature h3 {
+      margin: 0 0 8px;
+      font-size: 18px;
+      letter-spacing: -0.02em;
+    }
+
+    .feature p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .shot {
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: #fff;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .shot img {
+      width: 100%;
+      height: 100%;
+      min-height: 280px;
+      object-fit: cover;
+      border-radius: 12px;
+      background: #f5f2e8;
+    }
+
+    .shot-stack {
+      display: grid;
+      gap: 18px;
+    }
+
+    .download {
+      padding: 94px 0;
+      color: #fff;
+      background:
+        linear-gradient(135deg, rgba(255, 214, 10, .28), transparent 44%),
+        linear-gradient(180deg, #17191f, #0f1013);
+    }
+
+    .download-box {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 24px;
+      align-items: center;
+    }
+
+    .download h2 {
+      margin: 0;
+      max-width: 680px;
+      font-size: clamp(34px, 5vw, 62px);
+      line-height: 1;
+      letter-spacing: -0.05em;
+    }
+
+    .download p {
+      max-width: 560px;
+      color: rgba(255,255,255,.70);
+      font-size: 17px;
+    }
+
+    .release-note {
+      margin-top: 18px;
+      color: rgba(255,255,255,.62);
+      font-size: 13px;
+    }
+
+    .download .primary {
+      background: #fff;
+      color: var(--ink);
+      box-shadow: 0 18px 38px rgba(0,0,0,.22);
+    }
+
+    footer {
+      padding: 34px 0;
+      color: var(--muted);
+      background: #0f1013;
+      border-top: 1px solid rgba(255,255,255,.08);
+      font-size: 13px;
+    }
+
+    .footer-inner {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 900px) {
+      .nav-links a:not(.download-small) { display: none; }
+      .hero { min-height: auto; padding-top: 42px; }
+      .hero-grid { grid-template-columns: 1fr; gap: 34px; }
+      .showcase { min-height: 520px; }
+      .strip { grid-template-columns: 1fr 1fr; }
+      .strip-item:nth-child(2) { border-right: 0; }
+      .strip-item:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
+      .feature-grid { grid-template-columns: 1fr; }
+      .gallery { grid-template-columns: 1fr; }
+      .download-box { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 560px) {
+      .wrap { width: min(100% - 28px, 1120px); }
+      .nav-inner { height: 62px; }
+      .download-small { padding: 8px 12px; font-size: 13px; }
+      h1 { font-size: 47px; }
+      .hero-copy { font-size: 17px; }
+      .button { width: 100%; }
+      .showcase { min-height: 470px; }
+      .app-icon { width: 82px; right: 4px; }
+      .mac-frame { inset-top: 42px; border-radius: 20px; }
+      .desktop { height: 408px; padding: 18px; }
+      .menubar { left: 18px; right: 18px; }
+      .popup { margin-top: 54px; }
+      .strip { grid-template-columns: 1fr; }
+      .strip-item { border-right: 0; border-bottom: 1px solid var(--line); }
+      .strip-item:last-child { border-bottom: 0; }
+      .shot img { min-height: 220px; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="wrap nav-inner">
+      <a class="brand" href="#top" aria-label="Clippa home">
+        <img src="assets/clippa-app-icon.svg" alt="">
+        <span>Clippa</span>
+      </a>
+      <div class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#screens">Screens</a>
+        <a href="#download" class="download-small">Download</a>
+      </div>
+    </div>
+  </nav>
+
+  <main id="top">
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div>
+          <div class="eyebrow"><span class="pulse"></span> Free Mac app via GitHub Releases</div>
+          <h1>The copy you just lost is still here.</h1>
+          <p class="hero-copy">Clippa gives your Mac a fast clipboard history. Press <strong>Cmd+Shift+V</strong>, search what you copied, preview images, and paste it back without breaking your flow.</p>
+          <div class="actions">
+            <a class="button primary" href="https://github.com/nagahara-naoki/Clippa/releases/latest">Download for Mac</a>
+            <a class="button secondary" href="https://github.com/nagahara-naoki/Clippa">View on GitHub</a>
+          </div>
+          <div class="meta">
+            <span><span class="check">✓</span> 100% local</span>
+            <span><span class="check">✓</span> Text, images, screenshots</span>
+            <span><span class="check">✓</span> No subscription</span>
+          </div>
+        </div>
+
+        <div class="showcase" aria-label="Clippa app preview">
+          <img class="app-icon" src="assets/clippa-app-icon.svg" alt="Clippa app icon">
+          <div class="mac-frame">
+            <div class="screen-bar">
+              <span class="dot red"></span>
+              <span class="dot yellow"></span>
+              <span class="dot green"></span>
+              <span style="margin-left:auto">Mac clipboard, finally useful</span>
+            </div>
+            <div class="desktop">
+              <div class="menubar">
+                <span>14:32</span>
+                <img src="assets/clippa-menubar.svg" alt="Clippa menu bar icon">
+              </div>
+              <div class="popup">
+                <div class="tabs">
+                  <div class="tab active">History</div>
+                  <div class="tab">Text</div>
+                </div>
+                <div class="search">Search history...</div>
+                <div class="row selected">
+                  <div class="row-icon">T</div>
+                  <div>
+                    <div class="row-title">Release notes for GitHub</div>
+                    <div class="row-sub">Copied just now</div>
+                  </div>
+                  <div class="key">1</div>
+                </div>
+                <div class="row">
+                  <div class="row-icon">I</div>
+                  <div>
+                    <div class="row-title">Screenshot 1440x900</div>
+                    <div class="row-sub">Image thumbnail</div>
+                  </div>
+                  <div class="key">2</div>
+                </div>
+                <div class="row">
+                  <div class="row-icon">U</div>
+                  <div>
+                    <div class="row-title">https://github.com/nagahara-naoki/Clippa</div>
+                    <div class="row-sub">URL</div>
+                  </div>
+                  <div class="key">3</div>
+                </div>
+                <div class="row">
+                  <div class="row-icon">Q</div>
+                  <div>
+                    <div class="row-title">Paste queue for repeated work</div>
+                    <div class="row-sub">Saved text</div>
+                  </div>
+                  <div class="key">4</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="below-fold">
+      <div class="wrap strip">
+        <div class="strip-item">
+          <strong>One shortcut</strong>
+          <p>Open Clippa anywhere with Cmd+Shift+V and paste with Return.</p>
+        </div>
+        <div class="strip-item">
+          <strong>Real history</strong>
+          <p>Keep text, URLs, rich text, file paths, images, and screenshots.</p>
+        </div>
+        <div class="strip-item">
+          <strong>Private by design</strong>
+          <p>Your clipboard database and image cache stay on your Mac.</p>
+        </div>
+        <div class="strip-item">
+          <strong>Free to install</strong>
+          <p>Download the latest build from GitHub Releases and start using it.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="features">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Built for the tiny moments that interrupt deep work.</h2>
+          <p>Clippa is not a heavy productivity suite. It is a small, native Mac utility that saves you from copying the same thing twice.</p>
+        </div>
+        <div class="feature-grid">
+          <article class="feature">
+            <div class="feature-icon">⌘</div>
+            <h3>Fast popup</h3>
+            <p>Summon your history with Cmd+Shift+V. Use arrow keys, number keys, Return, and Space without reaching for the mouse.</p>
+          </article>
+          <article class="feature">
+            <div class="feature-icon">⌕</div>
+            <h3>Search everything</h3>
+            <p>Find old copies by typing a few letters. Text, links, source app names, and timestamps stay easy to scan.</p>
+          </article>
+          <article class="feature">
+            <div class="feature-icon">▣</div>
+            <h3>Image history</h3>
+            <p>Images and screenshots are stored with thumbnails, so the thing you captured does not disappear after the next copy.</p>
+          </article>
+          <article class="feature">
+            <div class="feature-icon">↑</div>
+            <h3>Pinned items</h3>
+            <p>Keep frequently used clips close. Pin important items and remove noise when the history gets crowded.</p>
+          </article>
+          <article class="feature">
+            <div class="feature-icon">Q</div>
+            <h3>Paste queue</h3>
+            <p>Queue several saved items and paste them one after another. Handy for forms, reports, support replies, and repeated work.</p>
+          </article>
+          <article class="feature">
+            <div class="feature-icon">T</div>
+            <h3>Saved text</h3>
+            <p>Store short reusable text and templates with date, time, clipboard, and cursor placeholders.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="screens">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Small window. Big relief.</h2>
+          <p>The interface stays compact, readable, and close to macOS. It is meant to be opened for a second, then disappear.</p>
+        </div>
+        <div class="gallery">
+          <div class="shot">
+            <img src="assets/history.svg" alt="Clippa history screen">
+          </div>
+          <div class="shot-stack">
+            <div class="shot">
+              <img src="assets/text.svg" alt="Clippa saved text screen">
+            </div>
+            <div class="shot">
+              <img src="assets/preview.svg" alt="Clippa preview screen">
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="download" id="download">
+      <div class="wrap download-box">
+        <div>
+          <h2>Install Clippa from GitHub Releases.</h2>
+          <p>Download the latest release, move Clippa to Applications, grant Accessibility permission when prompted, and your Mac gets clipboard history.</p>
+          <div class="release-note">macOS 12 or later recommended. Apple Silicon and Intel builds are packaged as a native Mac app.</div>
+        </div>
+        <a class="button primary" href="https://github.com/nagahara-naoki/Clippa/releases/latest">Get latest release</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap footer-inner">
+      <span>Clippa - Clipboard history for Mac</span>
+      <span>Local-first. Free via GitHub Releases.</span>
+    </div>
+  </footer>
+</body>
+</html>

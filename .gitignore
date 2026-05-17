@@ -1,0 +1,41 @@
+# macOS
+.DS_Store
+
+# Xcode user state
+*.xcuserstate
+xcuserdata/
+*.xcuserdata/
+*.xcuserdatad/
+
+# Build outputs
+build/
+DerivedData/
+*.xcresult
+*.dSYM/
+*.app/
+*.ipa
+*.pkg
+*.dmg
+*.zip
+
+# Swift / Xcode generated files
+.build/
+Package.resolved
+
+# Local environment
+.env
+.env.*
+*.local
+
+# Logs
+*.log
+
+# Legacy planning / store drafts that still describe an older paid model
+marketing.md
+requirements.md
+OVERVIEW.md
+OVERVIEW.en.md
+assets/app-store/
+assets/appstore/
+assets/landing/
+assets/ui-mockup/
