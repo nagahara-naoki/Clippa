@@ -19,7 +19,7 @@ struct OnboardingView: View {
             Button(step < 2 ? "Next" : NSLocalizedString("onboarding.done", comment: "")) {
                 if step < 2 {
                     if step == 1 {
-                        _ = Permissions.isAccessibilityTrusted(promptIfNeeded: true)
+                        _ = Permissions.requestAccessibilityTrust()
                     }
                     step += 1
                 } else {

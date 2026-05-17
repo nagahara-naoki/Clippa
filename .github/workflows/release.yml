@@ -67,6 +67,9 @@ jobs:
             exit 1
           fi
 
+          codesign --force --deep --sign - --entitlements Resources/Clippa.entitlements "$APP_PATH"
+          codesign --verify --deep --strict "$APP_PATH"
+
           ZIP_PATH="$DIST_DIR/Clippa-$VERSION.zip"
           DMG_PATH="$DIST_DIR/Clippa-$VERSION.dmg"
           STAGING_DIR="$(mktemp -d "$DIST_DIR/dmg-stage.XXXXXX")"

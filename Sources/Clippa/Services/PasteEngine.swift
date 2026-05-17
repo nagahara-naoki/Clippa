@@ -64,7 +64,7 @@ enum PasteEngine {
     }
 
     static func sendCmdV() {
-        guard Permissions.isAccessibilityTrusted(promptIfNeeded: true) else {
+        guard Permissions.isAccessibilityTrusted() else {
             Log.error("Accessibility not granted; cannot send Cmd+V")
             return
         }

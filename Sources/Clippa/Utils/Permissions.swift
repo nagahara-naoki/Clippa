@@ -2,9 +2,13 @@ import AppKit
 import ApplicationServices
 
 enum Permissions {
-    static func isAccessibilityTrusted(promptIfNeeded: Bool = false) -> Bool {
+    static func isAccessibilityTrusted() -> Bool {
+        AXIsProcessTrusted()
+    }
+
+    static func requestAccessibilityTrust() -> Bool {
         let key = kAXTrustedCheckOptionPrompt.takeUnretainedValue()
-        let options: CFDictionary = [key: promptIfNeeded] as CFDictionary
+        let options: CFDictionary = [key: true] as CFDictionary
         return AXIsProcessTrustedWithOptions(options)
     }
 
