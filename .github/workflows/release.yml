@@ -1,0 +1,88 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-and-release:
+    runs-on: macos-14
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+
+      - name: Run tests
+        run: |
+          xcodebuild \
+            -project Clippa.xcodeproj \
+            -scheme Clippa \
+            -destination 'platform=macOS' \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            DEVELOPMENT_TEAM="" \
+            test
+
+      - name: Build and package
+        run: |
+          set -euo pipefail
+
+          DERIVED_DATA_PATH="$PWD/build/DerivedData"
+          DIST_DIR="$PWD/build/dist"
+          VERSION="${GITHUB_REF_NAME#v}"
+
+          rm -rf "$DERIVED_DATA_PATH" "$DIST_DIR"
+          mkdir -p "$DIST_DIR"
+
+          xcodebuild \
+            -project Clippa.xcodeproj \
+            -scheme Clippa \
+            -configuration Release \
+            -destination 'platform=macOS' \
+            -derivedDataPath "$DERIVED_DATA_PATH" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            DEVELOPMENT_TEAM="" \
+            build
+
+          APP_PATH="$(find "$DERIVED_DATA_PATH/Build/Products/Release" -maxdepth 1 -name 'Clippa.app' -print -quit)"
+          if [[ -z "$APP_PATH" || ! -d "$APP_PATH" ]]; then
+            echo "error: Clippa.app was not produced" >&2
+            exit 1
+          fi
+
+          ZIP_PATH="$DIST_DIR/Clippa-$VERSION.zip"
+          DMG_PATH="$DIST_DIR/Clippa-$VERSION.dmg"
+          STAGING_DIR="$(mktemp -d "$DIST_DIR/dmg-stage.XXXXXX")"
+
+          ditto -c -k --keepParent "$APP_PATH" "$ZIP_PATH"
+          cp -R "$APP_PATH" "$STAGING_DIR/"
+          ln -s /Applications "$STAGING_DIR/Applications"
+          hdiutil create \
+            -volname "Clippa" \
+            -srcfolder "$STAGING_DIR" \
+            -ov \
+            -format UDZO \
+            "$DMG_PATH" >/dev/null
+          rm -rf "$STAGING_DIR"
+
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            build/dist/*.zip
+            build/dist/*.dmg

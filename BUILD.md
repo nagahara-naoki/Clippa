@@ -4,21 +4,10 @@
 
 - macOS 13 (Ventura) 以降の開発機（ビルド側）
 - Xcode 15 以降
-- Apple Developer Program（公証・配布に必要、年 ¥12,800）
-- Homebrew
+- GitHub Releases へ公開するための GitHub Actions
+- 署名と公証を追加する場合のみ Apple Developer Program
 
-## 推奨：XcodeGen でプロジェクトを生成
-
-`.xcodeproj` ファイルは差分管理が困難なので、`project.yml` から生成する方式を採用しています。
-
-```bash
-brew install xcodegen
-cd <repo-root>
-xcodegen generate
-open Clippa.xcodeproj
-```
-
-これで `Clippa.xcodeproj` が生成され、Xcode で開けます。
+このリポジトリは `Clippa.xcodeproj` を直接使います。`project.yml` からの生成は不要です。
 
 ## ビルド
 
@@ -28,48 +17,43 @@ open Clippa.xcodeproj
 xcodebuild -project Clippa.xcodeproj -scheme Clippa -configuration Debug
 ```
 
-成果物は `~/Library/Developer/Xcode/DerivedData/.../Build/Products/Debug/Clippa.app`
+成果物は `~/Library/Developer/Xcode/DerivedData/.../Build/Products/Debug/Clippa.app` です。
 
 ### Release ビルド（配布用、要 Developer ID）
 
 ```bash
 xcodebuild -project Clippa.xcodeproj -scheme Clippa \
   -configuration Release \
-  CODE_SIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)" \
-  -derivedDataPath ./build
+  -destination 'platform=macOS' \
+  -derivedDataPath ./build/DerivedData \
+  CODE_SIGNING_ALLOWED=NO \
+  CODE_SIGNING_REQUIRED=NO \
+  CODE_SIGN_IDENTITY="" \
+  DEVELOPMENT_TEAM=""
 ```
 
-## 公証（Notarization）
+GitHub Releases に載せる配布物は、まずはこの状態で `Clippa.app` を ZIP / DMG にまとめる運用で十分です。
 
-直接配布版は Apple 公証が必須。
+## タグから自動公開する流れ
 
-```bash
-# .app を zip 化
-ditto -c -k --keepParent build/Build/Products/Release/Clippa.app Clippa.zip
+1. `git tag v1.0.0`
+2. `git push origin v1.0.0`
+3. GitHub Actions が macOS 上でテストとビルドを実行
+4. `Clippa-1.0.0.zip` と `Clippa-1.0.0.dmg` を GitHub Release に添付
 
-# 公証提出（Apple ID と App-Specific Password が必要）
-xcrun notarytool submit Clippa.zip \
-  --apple-id "you@example.com" \
-  --team-id "TEAMID" \
-  --password "app-specific-password" \
-  --wait
+Actions の本体は [`.github/workflows/release.yml`](./.github/workflows/release.yml) です。
 
-# ステープル（公証チケットを .app に埋め込む）
-xcrun stapler staple build/Build/Products/Release/Clippa.app
-```
+## 署名と公証を足す場合
 
-## DMG 作成
+公開後に Gatekeeper 警告を減らしたいなら、Apple Developer ID の署名と notarization を追加します。
 
-```bash
-brew install create-dmg
-create-dmg \
-  --volname "Clippa" \
-  --window-size 600 400 \
-  --icon-size 100 \
-  --app-drop-link 400 200 \
-  Clippa.dmg \
-  build/Build/Products/Release/Clippa.app
-```
+必要なもの:
+
+- `APPLE_TEAM_ID`
+- Developer ID Application 証明書
+- `notarytool` 用の App-Specific Password か App Store Connect API キー
+
+いまのワークフローは、まず GitHub Releases で配布を始めるための最短構成にしています。
 
 ## 初回実行時の権限
 

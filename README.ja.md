@@ -91,15 +91,7 @@ Clippa はローカルファーストです。履歴データは以下に保存�
 
 - 開発環境として macOS 13 以降
 - Xcode 15 以降
-- XcodeGen
-
-Xcode プロジェクトを生成:
-
-```bash
-brew install xcodegen
-xcodegen generate
-open Clippa.xcodeproj
-```
+- Xcode command line tools
 
 コマンドラインでビルド:
 
@@ -121,6 +113,17 @@ xcodebuild test \
 ```
 
 詳しくは [BUILD.md](./BUILD.md) を見てください。
+
+## リリース用パイプライン
+
+Clippa は GitHub Releases から公開する前提で設定しています。`v1.0.0` のようなタグを push すると、GitHub Actions が次を自動で行います。
+
+1. テストを実行
+2. macOS 上でアプリをビルド
+3. `Clippa.app` を ZIP と DMG にまとめる
+4. GitHub Release に成果物をアップロード
+
+ワークフローは [`.github/workflows/release.yml`](./.github/workflows/release.yml) です。
 
 ## プロジェクト構成
 

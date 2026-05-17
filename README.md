@@ -91,15 +91,7 @@ Requirements:
 
 - macOS 13 or later for development
 - Xcode 15 or later
-- XcodeGen
-
-Generate the Xcode project:
-
-```bash
-brew install xcodegen
-xcodegen generate
-open Clippa.xcodeproj
-```
+- Xcode command line tools
 
 Build from the command line:
 
@@ -121,6 +113,17 @@ xcodebuild test \
 ```
 
 More details are in [BUILD.md](./BUILD.md).
+
+## Release Pipeline
+
+Clippa is set up to publish from GitHub Releases. When you push a tag like `v1.0.0`, GitHub Actions will:
+
+1. run the test suite
+2. build the app on macOS
+3. package `Clippa.app` into both ZIP and DMG formats
+4. upload the assets to a GitHub Release
+
+The workflow lives in [`.github/workflows/release.yml`](./.github/workflows/release.yml).
 
 ## Project Structure
 
